@@ -10,7 +10,7 @@ Contact Manager is a mini-project that manages contacts using **Clean Architectu
 
 ## Installation 
 
-    - clone the repository
+clone the repository
 
 ```bash
 git https://github.com/soabberry/ContactManager-clean_architecture.git
