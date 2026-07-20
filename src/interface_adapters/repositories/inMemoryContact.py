@@ -23,8 +23,8 @@ class InMemoryContactRepository(ContactRepository):
     def find_all(self) -> List[Contact]:
         return [copy.deepcopy(t) for t in self._store.values()]
 
-    def list_by_status(self, status):
-        return super().list_by_status(status)
+    def list_by_status(self, status: ContactStatus) -> List[Contact]:
+        return [copy.deepcopy(c) for c in self._store.values() if c.status == status]
 
     def update(self, contact: Contact) -> Contact:
         if contact.id not in self._store:

@@ -1,21 +1,16 @@
-from typing import Any, Dict, List
 from src.entities.contact import Contact
 
 class ContactPresenter:
 
     @staticmethod
-    def to_dict(contact: Contact) -> Dict[str, Any]:
-
-        return {
-            "id": contact.id,
-            "name": contact.name,
-            "phone": contact.phone,
-            "email": contact.email,
-            "status" : contact.status.value,
-            "created_at" : contact.created_at.isoformat(),
-            "updated_at": contact.updated_at.isoformat() if contact.updated_at else None,
-        }
-
-    @staticmethod
-    def to_list(contacts: List[Contact]) -> List[Dict[str, Any]]:
-        return [ContactPresenter.to_dict(t) for t in contacts]
+    def to_cli_detail(contact: Contact) -> str:
+        lines = [
+            f"  ID          : {contact.id}",
+            f"  Name        : {contact.name}",
+            f"  Phone       : {contact.phone}",
+            f"  Email       : {contact.email}",
+            f"  Status      : {contact.status.value}",
+            f"  Created     : {contact.created_at}",
+            f"  Updated     : {contact.updated_at}",
+        ]
+        return "\n".join(lines)

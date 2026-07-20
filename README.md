@@ -5,8 +5,9 @@ Contact Manager is a mini-project that manages contacts using **Clean Architectu
 ## Features 
     1. Add a new contact
     2. Update a contact
-    3. List the contacts
+    3. Get a contact
     4. Remove a contact 
+    5. List the contacts
 
 ## Installation 
 

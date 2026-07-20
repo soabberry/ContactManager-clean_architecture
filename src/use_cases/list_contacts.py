@@ -23,7 +23,7 @@ class ListContactsUseCase:
 
     def execute(self, input_data: ListContactsInput) -> ListContactsOutput:
         if input_data.status_filter is not None:
-            contacts = self.repository.find_by_status(input_data.status_filter)
+            contacts = self.repository.list_by_status(input_data.status_filter)
         else:
             contacts = self.repository.find_all()
 

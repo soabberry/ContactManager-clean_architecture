@@ -1,96 +1,98 @@
+#IMPORTS
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 import re
 import uuid
 
-#Method for getting the current UTC time
+#Method to get the time
 def _now() -> datetime:
     return datetime.now(timezone.utc)
 
-#This class defines the possible states of a Contact in our business domain.
-class ContactStatus(Enum):
-    PENDING = "pending"
-    IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
+#Class to create different states of a contact
+class ContactStatus(str, Enum):
+    CREATED = "created"
+    ACTIVATED = "activated"
+    BLOCKED = "blocked"
 
-#This class represents a Contact entity with attributes and methods to manage its state and validate its data.
+
 @dataclass
 class Contact:
-    #Attributes of the Contact entity
-    name : str
-    phone : str
-    email : str
-    id : str = field(default_factory=lambda: str(uuid.uuid4())) #Id is generated automatically using UUID
-    status : ContactStatus = field(default=ContactStatus.PENDING) #Default status is PENDING
-    created_at : datetime = field(default_factory=_now) #Creation timestamp is set to current
+    name: str
+    phone: str
+    email: str
+    
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    status: ContactStatus = field(default=ContactStatus.CREATED)
+    created_at: datetime = field(default_factory=_now)
+    updated_at: datetime = field(default_factory=_now)
+    def __post_init__(self):
 
-    def __post_init__(self) -> None:
-        
-        #Validation of the attribute 'name' after initialization 
         if not self.name or not self.name.strip():
             raise ValueError("Contact name cannot be empty")
         self.name = self.name.strip()
 
-        #Validation of the attribute 'phone' after initialization 
         if not self.phone or not self.phone.strip():
             raise ValueError("Contact phone cannot be empty")
-        if not self.phone.isdigit() or len(self.phone) < 10 or len(self.phone) > 15:
-            raise ValueError("Enter a valid phone number")
         self.phone = self.phone.strip()
+        if not self.phone.isdigit():
+            raise ValueError("Invalid phone number")
 
-        #Validation of the attribute 'email' after initialization 
         if not self.email or not self.email.strip():
             raise ValueError("Contact email cannot be empty")
-        if not re.match(r"[^@]+@[^@]+\.[^@]+", self.email):
-            raise ValueError("Enter a valid email address") 
         self.email = self.email.strip()
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", self.email):
+            raise ValueError("Invalid email address")
+        
 
-    def start(self) -> None:
-        if self.status != ContactStatus.PENDING:
-            raise ValueError(
-                f"Cannot start a contact that is '{self.status}'. "
-                "Only PENDING contacts can be started."
-            )
-        self.status = ContactStatus.IN_PROGRESS
+    def activate(self) -> bool:
+        if self.status != ContactStatus.CREATED:
+            return False
+        self.status = ContactStatus.ACTIVATED
         self.updated_at = _now()
+        return True
 
-    def complete(self) -> None:
-        if self.status == ContactStatus.COMPLETED:
-            raise ValueError("Contact is already completed.")
-        self.status = ContactStatus.COMPLETED
+    def block(self) -> bool:
+        if self.status == ContactStatus.BLOCKED:
+            return False
+        self.status = ContactStatus.BLOCKED
         self.updated_at = _now()
+        return True
 
-    def update(self, name: str = None, phone: str = None, email: str = None) -> None:
-        if name is not None:
+    def update(self, name: str | None = None, phone: str | None = None, email: str | None = None, status: "ContactStatus | None" = None) -> bool:
+        if name is not None: 
             if not name.strip():
-                raise ValueError("Contact name cannot be empty")
+                return False
             self.name = name.strip()
 
         if phone is not None:
-            if not phone.strip():
-                raise ValueError("Contact phone cannot be empty")
-            if not self.phone.isdigit() or len(self.phone) < 10 or len(self.phone) > 15:
-                raise ValueError("Enter a valid phone number")
-            self.phone = phone.strip()
+            phone = phone.strip()
+            if not phone.isdigit():
+                return False
+            self.phone = phone
 
         if email is not None:
-            if not email.strip():
-                raise ValueError("Contact email cannot be empty")
-            if not re.match(r"[^@]+@[^@]+\.[^@]+", self.email):
-                raise ValueError("Enter a valid email address")
-            self.email = email.strip()
+            email = email.strip()
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+                return False
+            self.email = email
+
+        if status is not None:
+            if not isinstance(status, ContactStatus):
+                try:
+                    status = ContactStatus(status)
+                except ValueError:
+                    return False
+            self.status = status
 
         self.updated_at = _now()
-
-    def is_completed(self) -> bool:
-        return self.status == ContactStatus.COMPLETED
-
-    def is_pending(self) -> bool:
-        return self.status == ContactStatus.PENDING
-
-    def is_in_progress(self) -> bool:
-        return self.status == ContactStatus.IN_PROGRESS
-
-
+        return True
     
+    def is_created(self) -> bool:
+        return self.status == ContactStatus.CREATED
+
+    def is_activated(self) -> bool:
+        return self.status == ContactStatus.ACTIVATED
+
+    def is_blocked(self) -> bool:
+        return self.status == ContactStatus.BLOCKED

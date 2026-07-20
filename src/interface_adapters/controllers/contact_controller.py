@@ -1,3 +1,5 @@
+from typing import Any
+
 from src.use_cases.interface.contact_repository import ContactRepository
 from src.use_cases.create_contact import CreateContactUseCase, CreateContactInput
 from src.use_cases.update_contact import UpdateContactUseCase, UpdateContactInput
@@ -15,23 +17,24 @@ class ContactController:
         self.get_contact_use_case = GetContactUseCase(contact)
         self.list_contacts_use_case = ListContactsUseCase(contact)
 
-    def create_contact(self, input_data: CreateContactInput) -> dict[str, any]:
+    def create_contact(self, input_data: CreateContactInput) -> dict[str, Any]:
         output = self.create_contact_use_case.execute(input_data)
-        return {"message": output.message, "contact": ContactPresenter.to_dict(output.contact)}
+        contact_view = ContactPresenter.to_cli_detail(output.contact) if output.contact else None
+        return {"message": output.message, "contact": contact_view}
     
-    def update_contact(self, input_data: UpdateContactInput) -> dict[str, any]:
+    def update_contact(self, input_data: UpdateContactInput) -> dict[str, Any]:
         output = self.update_contact_use_case.execute(input_data)
-        return {"message": output.message, "contact": ContactPresenter.to_dict(output.contact)}
+        contact_view = ContactPresenter.to_cli_detail(output.contact) if output.contact else None
+        return {"message": output.message, "contact": contact_view}
 
-    def delete_contact(self, input_data: DeleteContactInput) -> dict[str, any]:
+    def delete_contact(self, input_data: DeleteContactInput) -> dict[str, Any]:
         result = self.delete_contact_use_case.execute(input_data)
         return {"deleted": result.deleted, "message": result.message}
     
-    def get_contact(self, input_data: GetContactInput) -> dict[str, any]:
+    def get_contact(self, input_data: GetContactInput) -> dict[str, Any]:
         output = self.get_contact_use_case.execute(input_data)
-        return ContactPresenter.to_dict(output.contact)
+        return {"contact": ContactPresenter.to_cli_detail(output.contact)}
     
-    def list_contacts(self, input_data: ListContactsInput) -> dict[str, any]:
-        contacts = self.list_contacts_use_case.execute(input_data)
-        return {"contacts": [ContactPresenter.to_dict(contact) for contact in contacts]}
-    
+    def list_contacts(self, input_data: ListContactsInput) -> dict[str, Any]:
+        output = self.list_contacts_use_case.execute(input_data)
+        return {"contacts": [ContactPresenter.to_cli_detail(contact) for contact in output.contacts], "total": output.total}

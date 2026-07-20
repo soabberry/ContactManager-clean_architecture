@@ -20,6 +20,29 @@ def banner() -> None:
     print("=" * 50 + "\n")
 
 
+def show_result(result: dict) -> None:
+    """Prints controller results with real line breaks instead of a raw dict repr."""
+
+    if "message" in result:
+        print(result["message"])
+
+    if "deleted" in result:
+        print("Deleted" if result["deleted"] else "Not deleted")
+
+    if result.get("contact"):
+        print()
+        print(result["contact"])
+
+    if "contacts" in result:
+        contacts = result["contacts"]
+        total = result.get("total", len(contacts))
+        print(f"\nTotal: {total}\n")
+        for i, contact in enumerate(contacts, start=1):
+            print(f"[{i}]")
+            print(contact)
+            print()
+
+
 def run_cli() -> None:
 
     repository = InMemoryContactRepository()
@@ -54,7 +77,7 @@ def run_cli() -> None:
                     )
                 )
 
-                print(result)
+                show_result(result)
 
             elif choice == "2":
 
@@ -66,7 +89,7 @@ def run_cli() -> None:
                     )
                 )
 
-                print(result)
+                show_result(result)
 
             elif choice == "3":
 
@@ -82,10 +105,11 @@ def run_cli() -> None:
                         name=name or None,
                         phone=phone or None,
                         email=email or None,
+                        status=input("New status (1: Created, 2: Activated, 3: Blocked, blank to skip): ") or None
                     )
                 )
 
-                print(result)
+                show_result(result)
 
             elif choice == "4":
 
@@ -97,7 +121,7 @@ def run_cli() -> None:
                     )
                 )
 
-                print(result)
+                show_result(result)
 
             elif choice == "5":
 
@@ -105,7 +129,7 @@ def run_cli() -> None:
                     ListContactsInput()
                 )
 
-                print(result)
+                show_result(result)
 
             elif choice == "0":
 
